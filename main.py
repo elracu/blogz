@@ -22,8 +22,16 @@ class Blog(db.Model):
         self.body = body
 
 
+
 @app.route('/', methods=['POST','GET'])
 def index():
+
+    entries = Blog.query.all()
+
+    return render_template('blog.html', title="Build A Blog", entries=entries)
+
+@app.route('/newpost', methods=['POST','GET'])
+def newpost():
 
     #check the type of request that's coming in. POST or GET
 
@@ -34,12 +42,12 @@ def index():
         db.session.add(new_entry)
         db.session.commit()
 
-    entries = Blog.query.all()    
+        entries = Blog.query.all() 
 
+        return render_template('blog.html', title="Build A Blog", entries=entries)
 
-    return render_template('blog.html', title="Build A Blog", entries=entries)
-
-
+    else:
+        return render_template('newpost.html')
 
 if __name__ == '__main__':
     app.run()
