@@ -30,6 +30,13 @@ def index():
 
     return render_template('blog.html', title="Build A Blog", entries=entries)
 
+@app.route('/blog', methods=['POST','GET'])
+def blog():
+
+    entries = Blog.query.all()
+
+    return render_template('blog.html', title="Build A Blog", entries=entries)
+
 @app.route('/newpost', methods=['POST','GET'])
 def newpost():
 
