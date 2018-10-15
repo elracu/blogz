@@ -10,9 +10,9 @@
             <label for="title">Title for your new blog:
                 <input type="text" name="title" />
             </label>
-            <!-- <label for="body">Your new blog:
+            <label for="body">Your new blog:
                     <textarea name="body"></textarea>
-            </label>                      -->
+            </label>                     
             <input type="submit" value='Add Entry'/>
         </form>
 
@@ -25,15 +25,17 @@
 
         <!-- conditional using jinja syntax, checking for lenght of entries list -->
 
-        {% if titles|length == 0 %}
+        {% if entries|length == 0 %}
         <p>There Are No Blog Entries Yet</p>
 
         {% else %}
-        <ul>
-            {% for title in titles %}
-            <li>{{title}}</li>
+       
+            {% for entry in entries %}
+            <h2>{{entry.title}}</h2>
+            <p>{{entry.body}}</p>
+            <hr/>
             {% endfor %}
-        </ul>
+        
 
         {% endif %}
 
