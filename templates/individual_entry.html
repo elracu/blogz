@@ -1,0 +1,14 @@
+<!-- Inserts the content from base.html-->
+
+{% extends "base.html" %}
+
+<!-- defines what will display in the block content that was declared in base.html-->
+
+{% block content %}
+     
+<h2>{{entry.title}}</h2>
+<p>{{entry.body}}</p>
+    
+{% endblock %}
+
+<!-- end of block content -->

@@ -24,41 +24,34 @@ class Blog(db.Model):
 
 
 @app.route('/', methods=['POST','GET'])
-def index():
-
-    entries = Blog.query.all()
-
-    return render_template('blog.html', title="Build A Blog", entries=entries)
-
 @app.route('/blog', methods=['POST','GET'])
-def blog():
+def index():
+    #defines a variable that will hold the unique id for each entry
+    entryid = request.args.get('id')
 
-    entries = Blog.query.all()
+    # if a user has clicked on one of the blog entry titles and passed on an id this executes
+    if (entryid):
+        entry = Blog.query.get(entryid)
+        #renders the individual_entry template
+        return render_template('individual_entry.html', title="Blog Entry", entry=entry)
+
+    else:
+        entries = Blog.query.all()
 
     return render_template('blog.html', title="Build A Blog", entries=entries)
 
-# @app.route('/newpost', methods=['POST','GET'])
-# def newpost():
+# @app.route('/blog', methods=['POST','GET'])
+# def blog():
 
-    #check the type of request that's coming in. POST or GET
+#     entries = Blog.query.all()
 
-    # if request.method == 'POST':
-    #     blog_title = request.form['title']
-    #     blog_body = request.form['body']
-    #     new_entry = Blog(blog_title,blog_body)
-    #     db.session.add(new_entry)
-    #     db.session.commit()
-
-    #     entries = Blog.query.all() 
-
-    #     return render_template('blog.html', title="Build A Blog", entries=entries)
-
-    # else:
-    #     return render_template('newpost.html')
+#     return render_template('blog.html', title="Build A Blog", entries=entries)
 
 
 @app.route('/newpost', methods=['POST','GET'])
 def newpost():
+
+    #check if a request is coming in, if not just render the empty form
 
     if request.method == 'POST':
         title = request.form['title']
@@ -67,39 +60,58 @@ def newpost():
         invalid_blog_title_error = ''
         invalid_blog_body_error = ''
 
-    #validating title
+        #validating title
         if title == '':
             invalid_blog_title_error = "Please fill in the title"
 
         else:
             title = title
 
-    #validating body
+        #validating body
         if body == '':
             invalid_blog_body_error = "Please fill in the body"
 
         else:
             body = body
 
-    #check the type of request that's coming in. POST or GET
+        #global check on title and body
         
         if not invalid_blog_title_error and not invalid_blog_body_error: 
-        #     return render_template('welcome.html', username=username)
 
-        # if request.method == 'POST':
             new_entry = Blog(title,body)
             db.session.add(new_entry)
             db.session.commit()
 
-            entries = Blog.query.all() 
+            # entries = Blog.query.all() 
 
-            return render_template('blog.html', title="Build A Blog", entries=entries)
+            # return render_template('blog.html', title="Build A Blog", entries=entries)
+
+            return redirect('/blog?id=' + str(new_entry.id))
 
         else:
             return render_template('newpost.html',invalid_blog_title_error = invalid_blog_title_error, invalid_blog_body_error = invalid_blog_body_error, title = title, body = body)
 
+    #render the empyt form
     else:
         return render_template('newpost.html')
 
+
+@app.route('/individualentry')
+def individualentry():
+    title = request.args['title']
+    body = request.args['body']
+    return title + body
+
+# http://127.0.0.1:5000/individualentry?title=hello&body=copy
+
+
+# @app.route('/individualentry', methods=['POST','GET'])
+# def individualentry():
+
+#     entries = Blog.query.all()
+
+#     return render_template('individual_entry.html', title="Individual Entry", entries=entries)
+
 if __name__ == '__main__':
     app.run()
+

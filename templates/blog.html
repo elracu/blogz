@@ -6,7 +6,7 @@
 
 {% block content %}
 
-        <h1>Build a Blog</h1>
+        <h1>Build an Blog</h1>
 
         <!-- conditional using jinja syntax, checking for lenght of entries list -->
 
@@ -16,7 +16,8 @@
         {% else %}
        
             {% for entry in entries %}
-            <h2>{{entry.title}}</h2>
+            <!-- /blog?id=" + str(new_entry.id) calls the blog route and it passes the id of each entry  -->
+            <a href="/blog?id={{entry.id}}"><h2>{{entry.title}}</h2></a>
             <p>{{entry.body}}</p>
             <hr/>
             {% endfor %}

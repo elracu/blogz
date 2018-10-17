@@ -1,5 +1,33 @@
+body {
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+nav {
+    text-align: center;
+}
+
+a {
+    color: rgb(50, 92, 148);
+}
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    text-decoration: underline;
+}
+
 h1 {
-    color: blue;
     text-align: center;
 }
 
