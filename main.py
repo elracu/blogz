@@ -37,21 +37,66 @@ def blog():
 
     return render_template('blog.html', title="Build A Blog", entries=entries)
 
-@app.route('/newpost', methods=['POST','GET'])
-def newpost():
+# @app.route('/newpost', methods=['POST','GET'])
+# def newpost():
 
     #check the type of request that's coming in. POST or GET
 
+    # if request.method == 'POST':
+    #     blog_title = request.form['title']
+    #     blog_body = request.form['body']
+    #     new_entry = Blog(blog_title,blog_body)
+    #     db.session.add(new_entry)
+    #     db.session.commit()
+
+    #     entries = Blog.query.all() 
+
+    #     return render_template('blog.html', title="Build A Blog", entries=entries)
+
+    # else:
+    #     return render_template('newpost.html')
+
+
+@app.route('/newpost', methods=['POST','GET'])
+def newpost():
+
     if request.method == 'POST':
-        blog_title = request.form['title']
-        blog_body = request.form['body']
-        new_entry = Blog(blog_title,blog_body)
-        db.session.add(new_entry)
-        db.session.commit()
+        title = request.form['title']
+        body = request.form['body']
 
-        entries = Blog.query.all() 
+        invalid_blog_title_error = ''
+        invalid_blog_body_error = ''
 
-        return render_template('blog.html', title="Build A Blog", entries=entries)
+    #validating title
+        if title == '':
+            invalid_blog_title_error = "Please fill in the title"
+
+        else:
+            title = title
+
+    #validating body
+        if body == '':
+            invalid_blog_body_error = "Please fill in the body"
+
+        else:
+            body = body
+
+    #check the type of request that's coming in. POST or GET
+        
+        if not invalid_blog_title_error and not invalid_blog_body_error: 
+        #     return render_template('welcome.html', username=username)
+
+        # if request.method == 'POST':
+            new_entry = Blog(title,body)
+            db.session.add(new_entry)
+            db.session.commit()
+
+            entries = Blog.query.all() 
+
+            return render_template('blog.html', title="Build A Blog", entries=entries)
+
+        else:
+            return render_template('newpost.html',invalid_blog_title_error = invalid_blog_title_error, invalid_blog_body_error = invalid_blog_body_error, title = title, body = body)
 
     else:
         return render_template('newpost.html')

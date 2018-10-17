@@ -6,14 +6,16 @@
 
 {% block content %}
     <h1>Add a Blog Entry</h1>
-    <form method="post">
+    <form method="POST">
         <label for="title">Title for your new blog:
-            <input type="text" name="title" />
+            <input type="text" name="title" value='{{title}}' />
         </label>
+        <span class="error">{{invalid_blog_title_error}}</span>
         <br/>
         <label for="body">Your new blog:
-                <textarea name="body"></textarea>
+                <textarea name="body" >{{body}}</textarea>
         </label>
+        <span class="error">{{invalid_blog_body_error}}</span>
         <br/>                     
         <input type="submit" value='Add Entry'/>
     </form>
