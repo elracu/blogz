@@ -4,23 +4,80 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:blogpassword@localhost:8889/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogzpassword@localhost:8889/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
 
-#Class that will store blog info in the database
+#Class that will be used to generate blog info in the database
 
 class Blog(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
     body = db.Column(db.Text)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
+        self.owner = owner
 
+#Class that will be used to generate user info in the database
+
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
+    blogs = db.relationship('Blog', backref='owner')
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+@app.route('/login', methods=['POST','GET'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and user.password == password:
+            # TODO - "remember" that user has logged in
+            return redirect('/newpost')
+        else:
+            # TODO - explain login failed
+            return '<h1>Error!</h1>'
+
+
+
+
+    return render_template('login.html')
+
+
+@app.route('/signup', methods=['POST','GET'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        verifypassword = request.form['verifypassword']
+
+
+
+        #TODO - validate imput
+
+        existing_user = User.query.filter_by(username=username).first()
+        if not existing_user:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect ('/newpost')
+            #TODO - "remember" that user has logged in 
+        else:
+            #TODO - user better response messaging
+            return '<h1>Duplicate User</h1>'
+
+    return render_template('signup.html')
 
 
 @app.route('/', methods=['POST','GET'])
@@ -78,7 +135,7 @@ def newpost():
         
         if not invalid_blog_title_error and not invalid_blog_body_error: 
 
-            new_entry = Blog(title,body)
+            new_entry = Blog(title,body,owner)
             db.session.add(new_entry)
             db.session.commit()
 
@@ -102,15 +159,6 @@ def individualentry():
     body = request.args['body']
     return title + body
 
-# http://127.0.0.1:5000/individualentry?title=hello&body=copy
-
-
-# @app.route('/individualentry', methods=['POST','GET'])
-# def individualentry():
-
-#     entries = Blog.query.all()
-
-#     return render_template('individual_entry.html', title="Individual Entry", entries=entries)
 
 if __name__ == '__main__':
     app.run()

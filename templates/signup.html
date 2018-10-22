@@ -1,0 +1,38 @@
+<!-- Inserts the content from base.html-->
+
+{% extends "base.html" %}
+
+<!-- defines what will display in the block content that was declared in base.html-->
+
+{% block content %}
+    <h1>Signup</h1>
+
+    
+    <form action="signup" method="POST">
+        <label> Username
+            <input type="text" name="username" value='{{username}}' />
+        </label>
+        <span class="error">{{invalid_username_error}}</span>
+        <br/>
+
+        <label> Password
+                <input type="password" name="password" />
+        </label>
+        <span class="error">{{invalid_password_error}}</span>
+        <br/>
+
+        <label> Verify Password
+                <input type="password" name="verifypassword" />
+        </label>
+        <span class="error">{{verify_error}}</span>
+        <br/>
+        
+        
+        <br/>
+        <input type="submit" />
+        
+    </form>
+
+{% endblock %}
+
+<!-- end of block content -->
