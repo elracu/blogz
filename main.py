@@ -62,20 +62,43 @@ def signup():
         password = request.form['password']
         verifypassword = request.form['verifypassword']
 
+        invalid_username_error = ''
+        invalid_password_error = ''
+        verify_error = ''
+        # duplicate_error = ''
 
+        #validating username
+        if not(3 <= len(username) <=20) or (' ' in username) == True:
+            invalid_username_error = "That's not valid username"
+            username = ''
 
-        #TODO - validate imput
+        else:
+            username = username
+
+        #validating password
+        if not(3 <= len(password) <=20) or (' ' in password) == True:
+            invalid_password_error = "That's not valid password"
+
+        #validating password verification
+        if password != verifypassword:
+            verify_error = "Passwords don't match"
 
         existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:
+        
+
+        if not existing_user and not invalid_username_error and not invalid_password_error and not verify_error:
+            
             new_user = User(username, password)
             db.session.add(new_user)
             db.session.commit()
             return redirect ('/newpost')
             #TODO - "remember" that user has logged in 
+            
+
         else:
-            #TODO - user better response messaging
-            return '<h1>Duplicate User</h1>'
+            invalid_username_error = "A user with that username already exists"
+            return render_template('signup.html',invalid_username_error = invalid_username_error, invalid_password_error = invalid_password_error,
+            verify_error = verify_error, username = username)
 
     return render_template('signup.html')
 
