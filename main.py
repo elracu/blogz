@@ -1,5 +1,5 @@
 
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -8,6 +8,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogzpassword@loc
 app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)
+app.secret_key = 'dfja9afn3290akdsf'
 
 #Class that will be used to generate blog info in the database
 
@@ -36,6 +37,15 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+# check for login - run the function before moving on to incoming request
+@app.before_request
+def require_login():
+    allowed_routes = ['login','signup','index', 'list_blogs']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect ('/login')
+
+
+
 @app.route('/login', methods=['POST','GET'])
 def login():
     if request.method == 'POST':
@@ -44,10 +54,12 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.password == password:
             # TODO - "remember" that user has logged in
+            session['username']=username
+            flash ("Logged in")
             return redirect('/newpost')
         else:
+            flash('User password incorrect or user does not exist', 'error')
             # TODO - explain login failed
-            return '<h1>Error!</h1>'
 
 
 
@@ -62,50 +74,62 @@ def signup():
         password = request.form['password']
         verifypassword = request.form['verifypassword']
 
-        invalid_username_error = ''
-        invalid_password_error = ''
-        verify_error = ''
-        # duplicate_error = ''
+        # invalid_username_error = ''
+        # invalid_password_error = ''
+        # verify_error = ''
+        # # duplicate_error = ''
 
-        #validating username
-        if not(3 <= len(username) <=20) or (' ' in username) == True:
-            invalid_username_error = "That's not valid username"
-            username = ''
+        # #validating username
+        # if not(3 <= len(username) <=20) or (' ' in username) == True:
+        #     invalid_username_error = "That's not valid username"
+        #     username = ''
 
-        else:
-            username = username
+        # else:
+        #     username = username
 
-        #validating password
-        if not(3 <= len(password) <=20) or (' ' in password) == True:
-            invalid_password_error = "That's not valid password"
+        # #validating password
+        # if not(3 <= len(password) <=20) or (' ' in password) == True:
+        #     invalid_password_error = "That's not valid password"
 
-        #validating password verification
-        if password != verifypassword:
-            verify_error = "Passwords don't match"
+        # #validating password verification
+        # if password != verifypassword:
+        #     verify_error = "Passwords don't match"
 
         existing_user = User.query.filter_by(username=username).first()
         
 
-        if not existing_user and not invalid_username_error and not invalid_password_error and not verify_error:
+        if not existing_user: 
+        # and not invalid_username_error and not invalid_password_error and not verify_error:
             
             new_user = User(username, password)
             db.session.add(new_user)
             db.session.commit()
-            return redirect ('/newpost')
             #TODO - "remember" that user has logged in 
-            
+            session['username']=username
+            return redirect ('/newpost')
+
 
         else:
-            invalid_username_error = "A user with that username already exists"
-            return render_template('signup.html',invalid_username_error = invalid_username_error, invalid_password_error = invalid_password_error,
-            verify_error = verify_error, username = username)
+            return render_template('signup.html')
+            # invalid_username_error = invalid_username_error, invalid_password_error = invalid_password_error,
+            # verify_error = verify_error, username = username)
 
     return render_template('signup.html')
 
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/blog')
 
 @app.route('/', methods=['POST','GET'])
-@app.route('/blog', methods=['POST','GET'])
 def index():
+    users = User.query.all()
+
+    return render_template('index.html', title="Blog Users", users=users)
+
+
+@app.route('/blog', methods=['POST','GET'])
+def list_blogs():
     #defines a variable that will hold the unique id for each entry
     entryid = request.args.get('id')
 
@@ -113,19 +137,12 @@ def index():
     if (entryid):
         entry = Blog.query.get(entryid)
         #renders the individual_entry template
-        return render_template('individual_entry.html', title="Blog Entry", entry=entry)
+        return render_template('individual_entry.html', entry=entry)
 
     else:
         entries = Blog.query.all()
 
-    return render_template('blog.html', title="Build A Blog", entries=entries)
-
-# @app.route('/blog', methods=['POST','GET'])
-# def blog():
-
-#     entries = Blog.query.all()
-
-#     return render_template('blog.html', title="Build A Blog", entries=entries)
+    return render_template('blog.html', title="Blog Posts", entries=entries)
 
 
 @app.route('/newpost', methods=['POST','GET'])
@@ -136,6 +153,7 @@ def newpost():
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
+        owner = User.query.filter_by(username=session['username']).first()
 
         invalid_blog_title_error = ''
         invalid_blog_body_error = ''
