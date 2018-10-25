@@ -7,7 +7,7 @@
 {% block content %}
      
 <h2>{{entry.title}}</h2>
-<h3>Written by {{entry.owner.username}}</h3>
+<h3>Written by <a href="/blog?user={{entry.owner_id}}">{{entry.owner.username}}</a></h3>
 <p>{{entry.body}}</p>
     
 {% endblock %}
